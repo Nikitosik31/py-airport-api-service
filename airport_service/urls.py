@@ -17,9 +17,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
+from rest_framework.permissions import AllowAny
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path("api/airport/", include("airport.urls", namespace="airport")),
+
     path("api/user/", include("user.urls", namespace="user")),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path(
