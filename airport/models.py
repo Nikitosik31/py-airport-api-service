@@ -5,6 +5,7 @@ from django.db import models
 
 from django.conf import settings
 from django.utils.text import slugify
+from rest_framework.exceptions import ValidationError
 
 
 class AirplaneType(models.Model):
@@ -71,6 +72,7 @@ class Airplane(models.Model):
     def capacity(self):
         return self.rows * self.seats_in_row
 
+
 class Route(models.Model):
     source = models.ForeignKey(Airport, on_delete=models.CASCADE, related_name='source_routes')
     destination = models.ForeignKey(Airport, on_delete=models.CASCADE, related_name='destination_routes')
@@ -112,11 +114,42 @@ class Ticket(models.Model):
     flight = models.ForeignKey(Flight, on_delete=models.CASCADE, related_name='tickets')
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='tickets')
 
-    class Meta:
-        unique_together = (('row', 'seat', 'flight',),)
-        ordering = ['-order']
-
-
     def __str__(self):
         return f"{self.flight} - row {self.row}, seat {self.seat}"
 
+    @staticmethod
+    def validate_ticket(row, seat, airplane, error_to_raise):
+        for ticket_attr_value, ticket_attr_name, airplane_attr_name in [
+            (row, 'row', 'rows'),
+            (seat, 'seat', 'seats_in_row'),
+        ]:
+            count_attrs = getattr(airplane, airplane_attr_name)
+            if not (1 <= ticket_attr_value <= count_attrs):
+                raise error_to_raise(
+                    {
+                        ticket_attr_name: f"{ticket_attr_name} "
+                        f"number must be in available range: "
+                        f"(1, {airplane_attr_name}): "
+                        f"(1, {count_attrs})"
+                    }
+                )
+
+    def clean(self):
+        Ticket.validate_ticket(self.row, self.seat, self.flight.airplane, ValidationError)
+
+    def save(
+        self,
+        *args,
+        force_insert=False,
+        force_update=False,
+        using=None,
+        update_fields=None,
+    ):
+        self.full_clean()
+        return super(Ticket, self).save(
+            force_insert, force_update, using, update_fields
+        )
+
+    class Meta:
+        unique_together = (('row', 'seat', 'flight',),)
+        ordering = ['-order']
