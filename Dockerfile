@@ -20,5 +20,6 @@ RUN adduser \
 
 RUN chown -R my_user /files/media /files/static
 RUN chmod -R 755 /files/media /files/static
+RUN mkdir -p /home/my_user && chown my_user /home/my_user
 
 USER my_user
