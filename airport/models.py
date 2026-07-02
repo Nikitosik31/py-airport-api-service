@@ -112,20 +112,6 @@ class Flight(models.Model):
         return self.arrival_time - self.departure_time
 
 
-class Order(models.Model):
-    created_at = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="orders",
-    )
-
-    class Meta:
-        ordering = ["-created_at"]
-
-    def __str__(self):
-        return str(self.created_at)
-
     def clean(self):
         if self.arrival_time <= self.departure_time:
             raise ValidationError(
@@ -150,6 +136,21 @@ class Order(models.Model):
             using=using,
             update_fields=update_fields,
         )
+
+class Order(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="orders",
+    )
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return str(self.created_at)
+
 
 class Ticket(models.Model):
     row = models.IntegerField()
