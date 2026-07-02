@@ -1,4 +1,5 @@
 import datetime
+from django.utils import timezone
 
 from airport.models import (
     Country,
@@ -70,8 +71,8 @@ def sample_flight(**params):
     defaults = {
         "route": sample_route(),
         "airplane": sample_airplane(),
-        "departure_time": datetime.datetime(2020, 1, 1, 10, 0),
-        "arrival_time": datetime.datetime(2020, 1, 2, 13, 0),
+        "departure_time": datetime.datetime(2020, 1, 1, 10, 0, tzinfo=datetime.timezone.utc),
+        "arrival_time": datetime.datetime(2020, 1, 2, 13, 0, tzinfo=datetime.timezone.utc),
         "flight_number": 10,
     }
     defaults.update(params)

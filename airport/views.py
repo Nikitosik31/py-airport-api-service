@@ -199,6 +199,7 @@ class FlightViewSet(viewsets.ModelViewSet):
                 - Count("tickets")
             )
         )
+        .order_by("id")
     )
     serializer_class = FlightSerializer
     permission_classes = [

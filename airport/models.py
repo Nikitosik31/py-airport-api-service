@@ -5,8 +5,7 @@ from django.db import models
 
 from django.conf import settings
 from django.utils.text import slugify
-from rest_framework.exceptions import ValidationError
-
+from django.core.exceptions import ValidationError
 
 class AirplaneType(models.Model):
     name = models.CharField(max_length=100)

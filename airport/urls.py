@@ -21,7 +21,7 @@ router.register("flight", FlightViewSet)
 router.register("airport", AirportViewSet)
 router.register("crew", CrewViewSet)
 router.register("airplane", AirplaneViewSet)
-router.register("orders", OrderViewSet)
+router.register("orders", OrderViewSet, basename="order")
 router.register("routes", RouteViewSet)
 
 urlpatterns = [path("", include(router.urls))]

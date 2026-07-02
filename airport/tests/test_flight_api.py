@@ -109,8 +109,8 @@ class AuthenticatedFlightApiTests(TestCase):
         flight1 = sample_flight(flight_number="PS102")
         flight2 = sample_flight(
             flight_number="PS103",
-            departure_time=datetime.datetime(2021, 5, 5, 10, 0),
-            arrival_time=datetime.datetime(2021, 5, 5, 14, 0),
+            departure_time=datetime.datetime(2021, 5, 5, 10, 0, tzinfo=datetime.timezone.utc),
+            arrival_time=datetime.datetime(2021, 5, 5, 14, 0, tzinfo=datetime.timezone.utc),
         )
 
         res = self.client.get(FLIGHT_URL, {"date": "2020-01-01"})
