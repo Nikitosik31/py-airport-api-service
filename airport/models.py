@@ -126,6 +126,30 @@ class Order(models.Model):
     def __str__(self):
         return str(self.created_at)
 
+    def clean(self):
+        if self.arrival_time <= self.departure_time:
+            raise ValidationError(
+                {
+                    "arrival_time":
+                        "Arrival time must be after departure time."
+                }
+            )
+
+    def save(
+        self,
+        *args,
+        force_insert=False,
+        force_update=False,
+        using=None,
+        update_fields=None,
+    ):
+        self.full_clean()
+        return super(Flight, self).save(
+            force_insert=force_insert,
+            force_update=force_update,
+            using=using,
+            update_fields=update_fields,
+        )
 
 class Ticket(models.Model):
     row = models.IntegerField()

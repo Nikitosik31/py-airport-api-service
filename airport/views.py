@@ -5,6 +5,7 @@ from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
@@ -174,7 +175,7 @@ class AirplaneViewSet(
             OpenApiParameter(
                 name="name",
                 type=OpenApiTypes.STR,
-                description="Filter by movie name (ex. ?name=exemple)",
+                description="Filter by airplane name (ex. ?name=exemple)",
             ),
             OpenApiParameter(
                 name="airplane_type",
@@ -213,8 +214,11 @@ class FlightViewSet(viewsets.ModelViewSet):
         queryset = self.queryset
 
         if date:
-            date = datetime.strptime(date, "%Y-%m-%d").date()
-            queryset = queryset.filter(departure_time__date=date)
+            try:
+                date = datetime.strptime(date, "%Y-%m-%d").date()
+                queryset = queryset.filter(departure_time__date=date)
+            except ValueError:
+                raise ValidationError({"date": "Invalid date format. Use YYYY-MM-DD."})
 
         if airplane_id_str:
             queryset = queryset.filter(airplane_id=int(airplane_id_str))
@@ -243,7 +247,7 @@ class FlightViewSet(viewsets.ModelViewSet):
             OpenApiParameter(
                 name="date",
                 type=OpenApiTypes.DATE,
-                description="Filter by datetime of MovieSession "
+                description="Filter by datetime of  "
                 "(ex. ?date=2022-10-23)",
             ),
             OpenApiParameter(
@@ -277,15 +281,12 @@ class OrderViewSet(
     mixins.CreateModelMixin,
     GenericViewSet,
 ):
-    queryset = Order.objects.prefetch_related(
-        "tickets__flight__airplane", "tickets__flight__route"
-    )
     serializer_class = OrderSerializer
     pagination_class = OrderPagination
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        return Order.objects.filter(user=self.request.user)
+        return Order.objects.filter(user=self.request.user).prefetch_related("tickets")
 
     def get_serializer_class(self):
         if self.action == "list":

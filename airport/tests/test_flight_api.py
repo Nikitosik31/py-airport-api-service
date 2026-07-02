@@ -44,7 +44,7 @@ def get_flight_queryset():
 
 
 def image_upload_url(airplane_id):
-    """Return URL for recipe image upload"""
+    """Return URL for airplane image upload"""
     return reverse("airport:airplane-upload-image", args=[airplane_id])
 
 
@@ -269,8 +269,8 @@ class AirplaneImageUploadTests(TestCase):
             )
 
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
-        movie = Airplane.objects.get(name="Name")
-        self.assertFalse(movie.image)
+        airplane = Airplane.objects.get(name="Name")
+        self.assertFalse(airplane.image)
 
     def test_image_url_is_shown_on_airplane_detail(self):
         url = image_upload_url(self.airplane.id)
@@ -294,7 +294,7 @@ class AirplaneImageUploadTests(TestCase):
 
         self.assertIn("image", res.data[0].keys())
 
-    def test_put_movie_not_allowed(self):
+    def test_put_airplane_not_allowed(self):
         airplane_type = sample_airplane_type()
 
         payload = {
@@ -311,7 +311,7 @@ class AirplaneImageUploadTests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    def test_delete_movie_not_allowed(self):
+    def test_delete_airplane_not_allowed(self):
         airplane = sample_airplane()
         url = airplane_detail_url(airplane.id)
 
