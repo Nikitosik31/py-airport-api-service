@@ -141,7 +141,7 @@ class AirplaneViewSet(
             airplane_type_ids = self._params_to_ints(airplane_type)
             queryset = queryset.filter(airplane_type_id__in=airplane_type_ids)
 
-        return queryset.distinct()
+        return queryset.order_by("id").distinct()
 
     def get_serializer_class(self):
         if self.action == "list":
@@ -191,7 +191,7 @@ class AirplaneViewSet(
 class FlightViewSet(viewsets.ModelViewSet):
     queryset = (
         Flight.objects.all()
-        .select_related("route", "airplane")
+        .select_related("route__source__city", "route__destination__city", "airplane")
         .prefetch_related("crew")
         .annotate(
             tickets_available=(

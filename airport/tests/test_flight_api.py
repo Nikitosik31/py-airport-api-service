@@ -85,7 +85,7 @@ class AuthenticatedFlightApiTests(TestCase):
         serializer = FlightListSerializer(flights, many=True)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(res.data, serializer.data)
+        self.assertEqual(res.data["results"], serializer.data)
 
     def test_filter_flight_by_airplane_id_str(self):
         airplane1 = sample_airplane(name="Airplane1")
@@ -102,8 +102,8 @@ class AuthenticatedFlightApiTests(TestCase):
         serializer1 = FlightListSerializer(annotated_flight)
         serializer2 = FlightListSerializer(annotated_flight2)
 
-        self.assertNotIn(serializer2.data, res.data)
-        self.assertIn(serializer1.data, res.data)
+        self.assertNotIn(serializer2.data, res.data["results"])
+        self.assertIn(serializer1.data, res.data["results"])
 
     def test_filter_flight_by_date(self):
         flight1 = sample_flight(flight_number="PS102")
@@ -121,8 +121,8 @@ class AuthenticatedFlightApiTests(TestCase):
         serializer1 = FlightListSerializer(annotated_flight)
         serializer2 = FlightListSerializer(annotated_flight2)
 
-        self.assertNotIn(serializer2.data, res.data)
-        self.assertIn(serializer1.data, res.data)
+        self.assertNotIn(serializer2.data, res.data["results"])
+        self.assertIn(serializer1.data, res.data["results"])
 
     def test_filter_flight_by_sours(self):
         city1 = sample_city(name="Kyiv")
@@ -145,8 +145,8 @@ class AuthenticatedFlightApiTests(TestCase):
         serializer1 = FlightListSerializer(annotated_flight)
         serializer2 = FlightListSerializer(annotated_flight2)
 
-        self.assertNotIn(serializer2.data, res.data)
-        self.assertIn(serializer1.data, res.data)
+        self.assertNotIn(serializer2.data, res.data["results"])
+        self.assertIn(serializer1.data, res.data["results"])
 
     def test_filter_flight_by_destination(self):
         city1 = sample_city(name="Kyiv")
@@ -169,8 +169,8 @@ class AuthenticatedFlightApiTests(TestCase):
         serializer1 = FlightListSerializer(annotated_flight)
         serializer2 = FlightListSerializer(annotated_flight2)
 
-        self.assertNotIn(serializer2.data, res.data)
-        self.assertIn(serializer1.data, res.data)
+        self.assertNotIn(serializer2.data, res.data["results"])
+        self.assertIn(serializer1.data, res.data["results"])
 
     def test_retrieve_flight_detail(self):
         flight = sample_flight(flight_number="PS101")
@@ -292,7 +292,7 @@ class AirplaneImageUploadTests(TestCase):
             self.client.post(url, {"image": ntf}, format="multipart")
         res = self.client.get(AIRPLANE_URL)
 
-        self.assertIn("image", res.data[0].keys())
+        self.assertIn("image", res.data["results"][0].keys())
 
     def test_put_airplane_not_allowed(self):
         airplane_type = sample_airplane_type()
