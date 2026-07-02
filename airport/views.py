@@ -3,7 +3,7 @@ from datetime import datetime
 from django.db.models import F, Count
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema, OpenApiParameter
-from rest_framework import mixins, status, viewsets, generics
+from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
@@ -194,7 +194,7 @@ class FlightViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(airplane_id=int(airplane_id_str))
 
         if source:
-            queryset = queryset.filter(route__sourсe__city__name__icontains=source)
+            queryset = queryset.filter(route__source__city__name__icontains=source)
 
         if destination:
             queryset = queryset.filter(route__destination__city__name__icontains=destination)
