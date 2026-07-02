@@ -24,7 +24,9 @@ class Country(models.Model):
 
 class City(models.Model):
     name = models.CharField(max_length=100)
-    country = models.ForeignKey(Country, on_delete=models.CASCADE, related_name='cities')
+    country = models.ForeignKey(
+        Country, on_delete=models.CASCADE, related_name="cities"
+    )
 
     def __str__(self):
         return self.name
@@ -32,16 +34,18 @@ class City(models.Model):
 
 class Airport(models.Model):
     name = models.CharField(max_length=100)
-    city = models.ForeignKey(City, on_delete=models.CASCADE, related_name='airports')
+    city = models.ForeignKey(
+        City, on_delete=models.CASCADE, related_name="airports"
+    )
 
     def __str__(self):
         return f"Airport: {self.name}. Closest city: {self.city.name}."
+
 
 class Crew(models.Model):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     position = models.CharField(max_length=100)
-
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
@@ -57,13 +61,15 @@ def airport_image_file_path(instance, filename):
 
     return os.path.join("uploads/airplanes/", filename)
 
+
 class Airplane(models.Model):
     name = models.CharField(max_length=100)
     rows = models.IntegerField()
     seats_in_row = models.IntegerField()
-    airplane_type = models.ForeignKey(AirplaneType, on_delete=models.CASCADE, related_name='airplanes')
+    airplane_type = models.ForeignKey(
+        AirplaneType, on_delete=models.CASCADE, related_name="airplanes"
+    )
     image = models.ImageField(null=True, upload_to=airport_image_file_path)
-
 
     def __str__(self):
         return self.name
@@ -74,19 +80,28 @@ class Airplane(models.Model):
 
 
 class Route(models.Model):
-    source = models.ForeignKey(Airport, on_delete=models.CASCADE, related_name='source_routes')
-    destination = models.ForeignKey(Airport, on_delete=models.CASCADE, related_name='destination_routes')
+    source = models.ForeignKey(
+        Airport, on_delete=models.CASCADE, related_name="source_routes"
+    )
+    destination = models.ForeignKey(
+        Airport, on_delete=models.CASCADE, related_name="destination_routes"
+    )
     distance = models.IntegerField()
 
     def __str__(self):
         return f"{self.source} -> {self.destination}"
 
+
 class Flight(models.Model):
-    route = models.ForeignKey(Route, on_delete=models.CASCADE, related_name='flights')
-    airplane = models.ForeignKey(Airplane, on_delete=models.CASCADE, related_name='flights')
+    route = models.ForeignKey(
+        Route, on_delete=models.CASCADE, related_name="flights"
+    )
+    airplane = models.ForeignKey(
+        Airplane, on_delete=models.CASCADE, related_name="flights"
+    )
     departure_time = models.DateTimeField()
     arrival_time = models.DateTimeField()
-    crew = models.ManyToManyField(Crew, blank=True, related_name='flights')
+    crew = models.ManyToManyField(Crew, blank=True, related_name="flights")
     flight_number = models.CharField(max_length=100, unique=True)
 
     def __str__(self):
@@ -94,15 +109,19 @@ class Flight(models.Model):
 
     @property
     def duration(self):
-        return (self.arrival_time - self.departure_time)
+        return self.arrival_time - self.departure_time
 
 
 class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='orders')
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="orders",
+    )
 
     class Meta:
-        ordering = ['-created_at']
+        ordering = ["-created_at"]
 
     def __str__(self):
         return str(self.created_at)
@@ -111,8 +130,12 @@ class Order(models.Model):
 class Ticket(models.Model):
     row = models.IntegerField()
     seat = models.IntegerField()
-    flight = models.ForeignKey(Flight, on_delete=models.CASCADE, related_name='tickets')
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='tickets')
+    flight = models.ForeignKey(
+        Flight, on_delete=models.CASCADE, related_name="tickets"
+    )
+    order = models.ForeignKey(
+        Order, on_delete=models.CASCADE, related_name="tickets"
+    )
 
     def __str__(self):
         return f"{self.flight} - row {self.row}, seat {self.seat}"
@@ -120,8 +143,8 @@ class Ticket(models.Model):
     @staticmethod
     def validate_ticket(row, seat, airplane, error_to_raise):
         for ticket_attr_value, ticket_attr_name, airplane_attr_name in [
-            (row, 'row', 'rows'),
-            (seat, 'seat', 'seats_in_row'),
+            (row, "row", "rows"),
+            (seat, "seat", "seats_in_row"),
         ]:
             count_attrs = getattr(airplane, airplane_attr_name)
             if not (1 <= ticket_attr_value <= count_attrs):
@@ -135,7 +158,9 @@ class Ticket(models.Model):
                 )
 
     def clean(self):
-        Ticket.validate_ticket(self.row, self.seat, self.flight.airplane, ValidationError)
+        Ticket.validate_ticket(
+            self.row, self.seat, self.flight.airplane, ValidationError
+        )
 
     def save(
         self,
@@ -150,9 +175,15 @@ class Ticket(models.Model):
             force_insert=force_insert,
             force_update=force_update,
             using=using,
-            update_fields=update_fields
+            update_fields=update_fields,
         )
 
     class Meta:
-        unique_together = (('row', 'seat', 'flight',),)
-        ordering = ['-order']
+        unique_together = (
+            (
+                "row",
+                "seat",
+                "flight",
+            ),
+        )
+        ordering = ["-order"]

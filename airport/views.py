@@ -10,74 +10,99 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
-from airport.models import Country, City, AirplaneType, Airport, Crew, Route, Airplane, Flight, Order
+from airport.models import (
+    Country,
+    City,
+    AirplaneType,
+    Airport,
+    Crew,
+    Route,
+    Airplane,
+    Flight,
+    Order,
+)
 from airport.permissions import IsAdminOrIfAuthenticatedReadOnly
-from airport.serializers import CountrySerializer, CitySerializer, AirplaneTypeSerializer, AirportSerializer, \
-    CrewSerializer, RouteSerializer, RouteListSerializer, AirplaneSerializer, AirplaneListSerializer, \
-    AirplaneDetailSerializer, AirplaneImageSerializer, FlightSerializer, FlightListSerializer, FlightDetailSerializer, \
-    OrderSerializer, OrderListSerializer
+from airport.serializers import (
+    CountrySerializer,
+    CitySerializer,
+    AirplaneTypeSerializer,
+    AirportSerializer,
+    CrewSerializer,
+    RouteSerializer,
+    RouteListSerializer,
+    AirplaneSerializer,
+    AirplaneListSerializer,
+    AirplaneDetailSerializer,
+    AirplaneImageSerializer,
+    FlightSerializer,
+    FlightListSerializer,
+    FlightDetailSerializer,
+    OrderSerializer,
+    OrderListSerializer,
+)
 
 
 class CountryViewSet(
-    mixins.ListModelMixin,
-    mixins.CreateModelMixin,
-    GenericViewSet
+    mixins.ListModelMixin, mixins.CreateModelMixin, GenericViewSet
 ):
     queryset = Country.objects.all()
     serializer_class = CountrySerializer
-    permission_classes = [IsAdminOrIfAuthenticatedReadOnly,]
+    permission_classes = [
+        IsAdminOrIfAuthenticatedReadOnly,
+    ]
 
 
 class CityViewSet(
-    mixins.ListModelMixin,
-    mixins.CreateModelMixin,
-    GenericViewSet
+    mixins.ListModelMixin, mixins.CreateModelMixin, GenericViewSet
 ):
     queryset = City.objects.all()
     serializer_class = CitySerializer
-    permission_classes = [IsAdminOrIfAuthenticatedReadOnly,]
+    permission_classes = [
+        IsAdminOrIfAuthenticatedReadOnly,
+    ]
 
 
 class AirplaneTypeViewSet(
-    mixins.ListModelMixin,
-    mixins.CreateModelMixin,
-    GenericViewSet
+    mixins.ListModelMixin, mixins.CreateModelMixin, GenericViewSet
 ):
     queryset = AirplaneType.objects.all()
     serializer_class = AirplaneTypeSerializer
-    permission_classes = [IsAdminOrIfAuthenticatedReadOnly,]
+    permission_classes = [
+        IsAdminOrIfAuthenticatedReadOnly,
+    ]
 
 
 class AirportViewSet(
-    mixins.ListModelMixin,
-    mixins.CreateModelMixin,
-    GenericViewSet
+    mixins.ListModelMixin, mixins.CreateModelMixin, GenericViewSet
 ):
     queryset = Airport.objects.all()
     serializer_class = AirportSerializer
-    permission_classes = [IsAdminOrIfAuthenticatedReadOnly,]
+    permission_classes = [
+        IsAdminOrIfAuthenticatedReadOnly,
+    ]
 
 
 class CrewViewSet(
-    mixins.ListModelMixin,
-    mixins.CreateModelMixin,
-    GenericViewSet
+    mixins.ListModelMixin, mixins.CreateModelMixin, GenericViewSet
 ):
     queryset = Crew.objects.all()
     serializer_class = CrewSerializer
-    permission_classes = [IsAdminOrIfAuthenticatedReadOnly,]
+    permission_classes = [
+        IsAdminOrIfAuthenticatedReadOnly,
+    ]
 
 
 class RouteViewSet(
     mixins.ListModelMixin,
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
-    GenericViewSet
+    GenericViewSet,
 ):
     queryset = Route.objects.select_related("source", "destination")
     serializer_class = RouteSerializer
-    permission_classes = [IsAdminOrIfAuthenticatedReadOnly,]
-
+    permission_classes = [
+        IsAdminOrIfAuthenticatedReadOnly,
+    ]
 
     def get_serializer_class(self):
         if self.action == "list":
@@ -89,17 +114,18 @@ class AirplaneViewSet(
     mixins.ListModelMixin,
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
-    GenericViewSet
+    GenericViewSet,
 ):
     queryset = Airplane.objects.select_related("airplane_type")
     serializer_class = AirplaneSerializer
-    permission_classes = [IsAdminOrIfAuthenticatedReadOnly,]
+    permission_classes = [
+        IsAdminOrIfAuthenticatedReadOnly,
+    ]
 
     @staticmethod
     def _params_to_ints(qs):
         """Converts a list of string IDs to a list of integers"""
         return [int(str_id) for str_id in qs.split(",")]
-
 
     def get_queryset(self):
         name = self.request.query_params.get("name")
@@ -116,7 +142,6 @@ class AirplaneViewSet(
 
         return queryset.distinct()
 
-
     def get_serializer_class(self):
         if self.action == "list":
             return AirplaneListSerializer
@@ -126,7 +151,6 @@ class AirplaneViewSet(
             return AirplaneImageSerializer
 
         return AirplaneSerializer
-
 
     @action(
         methods=["POST"],
@@ -151,13 +175,12 @@ class AirplaneViewSet(
                 name="name",
                 type=OpenApiTypes.STR,
                 description="Filter by movie name (ex. ?name=exemple)",
-
             ),
             OpenApiParameter(
                 name="airplane_type",
                 type={"type": "list", "items": {"type": "number"}},
                 description="Filter by airplane type (ex. ?airplane_type=2,5)",
-            )
+            ),
         ]
     )
     def list(self, request, *args, **kwargs):
@@ -171,12 +194,15 @@ class FlightViewSet(viewsets.ModelViewSet):
         .prefetch_related("crew")
         .annotate(
             tickets_available=(
-                F("airplane__rows") * F("airplane__seats_in_row") - Count("tickets")
+                F("airplane__rows") * F("airplane__seats_in_row")
+                - Count("tickets")
             )
         )
     )
     serializer_class = FlightSerializer
-    permission_classes = [IsAdminOrIfAuthenticatedReadOnly,]
+    permission_classes = [
+        IsAdminOrIfAuthenticatedReadOnly,
+    ]
 
     def get_queryset(self):
         date = self.request.query_params.get("date")
@@ -194,14 +220,16 @@ class FlightViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(airplane_id=int(airplane_id_str))
 
         if source:
-            queryset = queryset.filter(route__source__city__name__icontains=source)
+            queryset = queryset.filter(
+                route__source__city__name__icontains=source
+            )
 
         if destination:
-            queryset = queryset.filter(route__destination__city__name__icontains=destination)
-
+            queryset = queryset.filter(
+                route__destination__city__name__icontains=destination
+            )
 
         return queryset.distinct()
-
 
     def get_serializer_class(self):
         if self.action == "list":
@@ -210,14 +238,13 @@ class FlightViewSet(viewsets.ModelViewSet):
             return FlightDetailSerializer
         return FlightSerializer
 
-
     @extend_schema(
         parameters=[
             OpenApiParameter(
                 name="date",
                 type=OpenApiTypes.DATE,
                 description="Filter by datetime of MovieSession "
-                "(ex. ?date=2022-10-23)"
+                "(ex. ?date=2022-10-23)",
             ),
             OpenApiParameter(
                 name="airplane",
@@ -239,16 +266,20 @@ class FlightViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
+
 class OrderPagination(PageNumberPagination):
     page_size = 10
     max_page_size = 100
+
 
 class OrderViewSet(
     mixins.ListModelMixin,
     mixins.CreateModelMixin,
     GenericViewSet,
 ):
-    queryset = Order.objects.prefetch_related("tickets__flight__airplane", "tickets__flight__route")
+    queryset = Order.objects.prefetch_related(
+        "tickets__flight__airplane", "tickets__flight__route"
+    )
     serializer_class = OrderSerializer
     pagination_class = OrderPagination
     permission_classes = (IsAuthenticated,)

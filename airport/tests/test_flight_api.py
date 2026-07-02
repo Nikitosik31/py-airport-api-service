@@ -11,7 +11,15 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 from rest_framework import status
 
-from airport.models import Country, City, Airport, Route, AirplaneType, Airplane, Flight
+from airport.models import (
+    Country,
+    City,
+    Airport,
+    Route,
+    AirplaneType,
+    Airplane,
+    Flight,
+)
 from airport.serializers import FlightListSerializer, FlightDetailSerializer
 from airport.tests.helpers import (
     sample_city,
@@ -29,9 +37,11 @@ FLIGHT_URL = reverse("airport:flight-list")
 def get_flight_queryset():
     return Flight.objects.annotate(
         tickets_available=(
-            F("airplane__rows") * F("airplane__seats_in_row") - Count("tickets")
+            F("airplane__rows") * F("airplane__seats_in_row")
+            - Count("tickets")
         )
     )
+
 
 def image_upload_url(airplane_id):
     """Return URL for recipe image upload"""
@@ -41,8 +51,10 @@ def image_upload_url(airplane_id):
 def detail_url(airplane_id):
     return reverse("airport:flight-detail", args=[airplane_id])
 
+
 def airplane_detail_url(airplane_id):
     return reverse("airport:airplane-detail", args=[airplane_id])
+
 
 class UnauthenticatedFlightApiTests(TestCase):
     def setUp(self):
@@ -82,9 +94,7 @@ class AuthenticatedFlightApiTests(TestCase):
         flight1 = sample_flight(flight_number="PS101", airplane=airplane1)
         flight2 = sample_flight(flight_number="PS102", airplane=airplane2)
 
-        res = self.client.get(
-            FLIGHT_URL, {"airplane": airplane1.id}
-        )
+        res = self.client.get(FLIGHT_URL, {"airplane": airplane1.id})
 
         annotated_flight = get_flight_queryset().get(id=flight1.id)
         annotated_flight2 = get_flight_queryset().get(id=flight2.id)
@@ -103,9 +113,7 @@ class AuthenticatedFlightApiTests(TestCase):
             arrival_time=datetime.datetime(2021, 5, 5, 14, 0),
         )
 
-        res = self.client.get(
-            FLIGHT_URL, {"date":"2020-01-01"}
-        )
+        res = self.client.get(FLIGHT_URL, {"date": "2020-01-01"})
 
         annotated_flight = get_flight_queryset().get(id=flight1.id)
         annotated_flight2 = get_flight_queryset().get(id=flight2.id)
@@ -129,9 +137,7 @@ class AuthenticatedFlightApiTests(TestCase):
         flight1 = sample_flight(flight_number="PS101", route=route1)
         flight2 = sample_flight(flight_number="PS102", route=route2)
 
-        res = self.client.get(
-            FLIGHT_URL, {"source": "Kyiv"}
-        )
+        res = self.client.get(FLIGHT_URL, {"source": "Kyiv"})
 
         annotated_flight = get_flight_queryset().get(id=flight1.id)
         annotated_flight2 = get_flight_queryset().get(id=flight2.id)
@@ -141,7 +147,6 @@ class AuthenticatedFlightApiTests(TestCase):
 
         self.assertNotIn(serializer2.data, res.data)
         self.assertIn(serializer1.data, res.data)
-
 
     def test_filter_flight_by_destination(self):
         city1 = sample_city(name="Kyiv")
@@ -156,9 +161,7 @@ class AuthenticatedFlightApiTests(TestCase):
         flight1 = sample_flight(flight_number="PS101", route=route1)
         flight2 = sample_flight(flight_number="PS102", route=route2)
 
-        res = self.client.get(
-            FLIGHT_URL, {"destination": "Kyiv"}
-        )
+        res = self.client.get(FLIGHT_URL, {"destination": "Kyiv"})
 
         annotated_flight = get_flight_queryset().get(id=flight1.id)
         annotated_flight2 = get_flight_queryset().get(id=flight2.id)
@@ -168,7 +171,6 @@ class AuthenticatedFlightApiTests(TestCase):
 
         self.assertNotIn(serializer2.data, res.data)
         self.assertIn(serializer1.data, res.data)
-
 
     def test_retrieve_flight_detail(self):
         flight = sample_flight(flight_number="PS101")
@@ -212,7 +214,6 @@ class AdminFlightApiTests(TestCase):
         res = self.client.post(FLIGHT_URL, payload)
 
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
-
 
 
 class AirplaneImageUploadTests(TestCase):
@@ -292,7 +293,6 @@ class AirplaneImageUploadTests(TestCase):
         res = self.client.get(AIRPLANE_URL)
 
         self.assertIn("image", res.data[0].keys())
-
 
     def test_put_movie_not_allowed(self):
         airplane_type = sample_airplane_type()

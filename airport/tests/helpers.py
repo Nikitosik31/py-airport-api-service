@@ -1,6 +1,14 @@
 import datetime
 
-from airport.models import Country, City, Airport, Route, AirplaneType, Airplane, Flight
+from airport.models import (
+    Country,
+    City,
+    Airport,
+    Route,
+    AirplaneType,
+    Airplane,
+    Flight,
+)
 
 
 def sample_country(**params):
@@ -10,6 +18,7 @@ def sample_country(**params):
     defaults.update(params)
     return Country.objects.create(**defaults)
 
+
 def sample_city(**params):
     defaults = {
         "name": "Sample city",
@@ -18,6 +27,7 @@ def sample_city(**params):
     defaults.update(params)
     return City.objects.create(**defaults)
 
+
 def sample_airport(**params):
     defaults = {
         "name": "Sample airport",
@@ -25,6 +35,7 @@ def sample_airport(**params):
     }
     defaults.update(params)
     return Airport.objects.create(**defaults)
+
 
 def sample_route(**params):
     defaults = {
@@ -35,12 +46,14 @@ def sample_route(**params):
     defaults.update(params)
     return Route.objects.create(**defaults)
 
+
 def sample_airplane_type(**params):
     defaults = {
         "name": "Sample airplane type",
     }
     defaults.update(params)
     return AirplaneType.objects.create(**defaults)
+
 
 def sample_airplane(**params):
     defaults = {
@@ -51,6 +64,7 @@ def sample_airplane(**params):
     }
     defaults.update(params)
     return Airplane.objects.create(**defaults)
+
 
 def sample_flight(**params):
     defaults = {
